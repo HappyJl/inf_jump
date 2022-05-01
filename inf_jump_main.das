@@ -5,8 +5,8 @@ let
     GROUND_COLOR    = 0x504022
     SKY_COLOR       = 0xB0E0FF
     COLUMN_COLOR    = 0xff00ff
-    JUMP_VELONCITY  = 400.0
-    MOVE_VELONCITY  = 2000.0
+    JUMP_VELONCITY  = 1000.0
+    MOVE_VELONCITY  = 1000.0
 
 struct Cube
     position: float2
@@ -19,9 +19,9 @@ struct Cube
 
 struct Platform
     posY: float
+    posX: float
     width: float
-    holeTop: float
-    holeBottom: float
+    height: float
 
 var
     RAND_SEED: int4
@@ -29,6 +29,7 @@ var
     right_pressed = false
     left_pressed = false
     cube: Cube
+    platform: Platform
     platforms: array<Platform>
 
 def reset_cube(var c: Cube)
@@ -38,34 +39,28 @@ def reset_cube(var c: Cube)
     c.size = 15.0
     c.move = -PI
     c.JumpState = 0.0;
-
+def reset_platform(var p:Platform)
+    p.posX = 500.0
+    p.posY = 300.0
+    p.width = 200.0
+    p.height = 25.0
 //------------------------------------------------------- move trash cube -----------------------------------------------------------------------
-def movev2(move: float): float2
-    return float2(cos(move), sin(move))
-
-def cube_accelerate(var c: Cube; dt: float)
-    c.velocity += movev2(c.move) * MOVE_VELONCITY * dt
-
-def cube_brake(var c: Cube; dt: float)
-    if length(c.velocity) < 20.0
-        c.velocity = float2(0.0)
-    else
-        c.velocity -= normalize(c.velocity) * 2000.0 * dt
-
-def jump_cube(var c: Cube)
-    c.velocity.y = clamp(c.velocity.y -400.0, -400.0, -400.0)
-
 def wrap(var v: float2&)
     if v.x < 0.0
         v.x += float(get_screen_width())
     if v.x > float(get_screen_width())
         v.x -= float(get_screen_width())
 
-def update_cube(var c: Cube; dt:float)
-    c.position += c.velocity * dt
+def update_cube(var c: Cube; var p: Platform; dt:float)
+    c.position = c.position + c.velocity * dt
     c.velocity.y += float(JUMP_VELONCITY) * dt
     if c.position.y > float(get_screen_height()) - 50.0
-        c.velocity.y = 0.0
+        c.position.y = float(get_screen_height()) - 50.0
+    if cube.position.y == float(get_screen_height()) - 50.0
+        cube.velocity.y = clamp(cube.velocity.y - 650.0, -650.0, -650.0)   
+    if  c.position.y - (c.size/2.0) < p.posY - (p.height/2.0)
+        cube.velocity.y = clamp(cube.velocity.y - 650.0, -650.0, -650.0)
+    
     wrap(c.position)
 
 //------------------------------------------------------- move trash cube -----------------------------------------------------------------------
@@ -76,8 +71,8 @@ def render_cube(var c: Cube)
     let y = int(c.position.y - c.size * 0.5)
     fill_rect(x, y, int(c.size), int(c.size), CUBE_COLOR)
 
-def render_platform()
-    fill_rect(500, 500, 200, 25, GROUND_COLOR)
+def render_platform(var p: Platform)
+    fill_rect(int(p.posX), int(p.posY), int(p.width), int(p.height), GROUND_COLOR)
 
 def render_background(t: float)
     fill_rect(0, 0, get_screen_width(), get_screen_height(), SKY_COLOR)
@@ -91,32 +86,27 @@ def render_ground()
 def initialize
     set_window_title("inf jump")
     reset_cube(cube)
+    reset_platform(platform)
 
 
 def update_gameplay(dt: float)
-    update_cube(cube, dt)
+    update_cube(cube, platform, dt)
 
 [export]
 def act(dt: float)
     if get_key(VK_ESCAPE)
         schedule_quit_game()
     // print("act dt={dt}\n")
-
-    if get_key(VK_A) || get_key(VK_LEFT)
-        cube_accelerate(cube, dt)
-    if get_key(VK_D) || get_key(VK_RIGHT)
-        cube_accelerate(cube, -dt)
-    if get_key_down(VK_W) || get_key_down(VK_UP)
-        jump_cube(cube)
-    if !(get_key(VK_A) || get_key(VK_D) || get_key(VK_RIGHT) || get_key(VK_LEFT))
-        cube_brake(cube, dt)
-    
     update_gameplay(dt)
+    
+    if get_key(VK_A) || get_key(VK_LEFT)
+        cube.position.x -= MOVE_VELONCITY * dt
+    if get_key(VK_D) || get_key(VK_RIGHT)
+        cube.position.x += MOVE_VELONCITY * dt
+   
 [export]
 def draw()
     render_background(camera_x)
     render_ground()
-    render_platform()
+    render_platform(platform)
     render_cube(cube)
-    
-
