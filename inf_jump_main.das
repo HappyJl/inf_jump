@@ -23,14 +23,15 @@ struct Platform
     width: float
     height: float
 
+let panelList = [[auto[]
+    [[Platform posY=700.0, posX=0.0, width=2000.0, height=25.0]];
+    [[Platform posY=500.0, posX=500.0, width=200.0, height=25.0]]
+]]
+
 var
-    RAND_SEED: int4
     camera_x = 0.0
-    right_pressed = false
-    left_pressed = false
     cube: Cube
     platform: Platform
-    platforms: array<Platform>
 
 def reset_cube(var c: Cube)
     c.position = float2(get_screen_width()/2)
@@ -39,11 +40,7 @@ def reset_cube(var c: Cube)
     c.size = 15.0
     c.move = -PI
     c.JumpState = 0.0;
-def reset_platform(var p:Platform)
-    p.posX = 500.0
-    p.posY = 500.0
-    p.width = 200.0
-    p.height = 25.0
+
 //------------------------------------------------------- move trash cube -----------------------------------------------------------------------
 def wrap(var v: float2&)
     if v.x < 0.0
@@ -52,14 +49,14 @@ def wrap(var v: float2&)
         v.x -= float(get_screen_width())
 
 def update_cube(var c: Cube; var p: Platform; dt:float)
-    c.position = c.position + c.velocity * dt
-    c.velocity.y += float(JUMP_VELONCITY) * dt
-    if c.position.y > float(get_screen_height()) - 50.0
-        c.position.y = float(get_screen_height()) - 50.0
-    if cube.position.y == float(get_screen_height()) - 50.0
-        cube.velocity.y = clamp(cube.velocity.y - 650.0, -650.0, -650.0)   
-    if  c.position.y - (c.size/2.0) < p.posY - (p.height/2.0)
-        cube.velocity.y = clamp(cube.velocity.y - 650.0, -650.0, -650.0)
+    //c.position = c.position + c.velocity * dt
+    //c.velocity.y += float(JUMP_VELONCITY) * dt
+    //if c.position.y > float(get_screen_height()) - 50.0
+        //c.position.y = float(get_screen_height()) - 50.0
+    //if cube.position.y == float(get_screen_height()) - 50.0
+        //cube.velocity.y = clamp(cube.velocity.y - 650.0, -650.0, -650.0)   
+    //if  c.position.y - (c.size/2.0) < p.posY - (p.height/2.0)
+        //cube.velocity.y = clamp(cube.velocity.y - 650.0, -650.0, -650.0)
     
     wrap(c.position)
 
@@ -71,8 +68,8 @@ def render_cube(var c: Cube)
     let y = int(c.position.y - c.size * 0.5)
     fill_rect(x, y, int(c.size), int(c.size), CUBE_COLOR)
 
-def render_platform(var p: Platform)
-    fill_rect(int(p.posX), int(p.posY), int(p.width), int(p.height), GROUND_COLOR)
+def render_platform(p: Platform)
+    fill_rect(p.posX, p.posY, p.width, p.height, GROUND_COLOR)
 
 def render_background(t: float)
     fill_rect(0, 0, get_screen_width(), get_screen_height(), SKY_COLOR)
@@ -86,7 +83,6 @@ def render_ground()
 def initialize
     set_window_title("inf jump")
     reset_cube(cube)
-    reset_platform(platform)
 
 
 def update_gameplay(dt: float)
@@ -107,6 +103,6 @@ def act(dt: float)
 [export]
 def draw()
     render_background(camera_x)
-    render_ground()
-    render_platform(platform)
+    for panel in panelList
+        render_platform(panel)
     render_cube(cube)

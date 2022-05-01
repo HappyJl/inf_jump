@@ -1,6 +1,6 @@
 {
    // path to dasbox.exe
-   "dascript.compiler": "C:/Users/alexy/Desktop/Скобочка/dasbox.exe",
+   "dascript.compiler": "C:/Users/alexy/Desktop/tester/dasbox.exe",
 
    "dascript.server.args": [
         "${file}",
