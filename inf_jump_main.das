@@ -14,7 +14,6 @@ struct Cube
     move: float
     MoveState: float
     size: float
-    accelerating: float
     JumpState: float
 
 struct Platform
@@ -24,8 +23,8 @@ struct Platform
     height: float
 
 let panelList = [[auto[]
-    [[Platform posY=700.0, posX=0.0, width=2000.0, height=25.0]];
-    [[Platform posY=500.0, posX=500.0, width=200.0, height=25.0]]
+    [[Platform posY=700.0, posX=500.0, width=200.0, height=25.0]];
+    [[Platform posY=200.0, posX=700.0, width=200.0, height=25.0]]
 ]]
 
 var
@@ -34,9 +33,9 @@ var
     platform: Platform
 
 def reset_cube(var c: Cube)
-    c.position = float2(get_screen_width()/2)
+    c.position.y = 600.0
+    c.position.x = 600.0
     c.velocity = float2(0.0)
-    c.accelerating = 0.0
     c.size = 15.0
     c.move = -PI
     c.JumpState = 0.0;
@@ -47,19 +46,6 @@ def wrap(var v: float2&)
         v.x += float(get_screen_width())
     if v.x > float(get_screen_width())
         v.x -= float(get_screen_width())
-
-def update_cube(var c: Cube; var p: Platform; dt:float)
-    //c.position = c.position + c.velocity * dt
-    //c.velocity.y += float(JUMP_VELONCITY) * dt
-    //if c.position.y > float(get_screen_height()) - 50.0
-        //c.position.y = float(get_screen_height()) - 50.0
-    //if cube.position.y == float(get_screen_height()) - 50.0
-        //cube.velocity.y = clamp(cube.velocity.y - 650.0, -650.0, -650.0)   
-    //if  c.position.y - (c.size/2.0) < p.posY - (p.height/2.0)
-        //cube.velocity.y = clamp(cube.velocity.y - 650.0, -650.0, -650.0)
-    
-    wrap(c.position)
-
 //------------------------------------------------------- move trash cube -----------------------------------------------------------------------
 
 //------------------------------------------------------- render some shit ----------------------------------------------------------------------
@@ -86,7 +72,14 @@ def initialize
 
 
 def update_gameplay(dt: float)
-    update_cube(cube, platform, dt)
+    for panel in panelList
+        cube.position = cube.position + cube.velocity * dt
+        cube.velocity.y += float(JUMP_VELONCITY) * dt
+        if cube.position.y > panel.posY
+            cube.position.y = panel.posY
+        if cube.position.y == panel.posY
+            cube.velocity.y = clamp(cube.velocity.y - 350.0, -350.0, -350.0)
+    wrap(cube.position)
 
 [export]
 def act(dt: float)
