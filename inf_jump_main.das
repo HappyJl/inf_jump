@@ -41,7 +41,7 @@ def reset_cube(var c: Cube)
     c.JumpState = 0.0;
 def reset_platform(var p:Platform)
     p.posX = 500.0
-    p.posY = 300.0
+    p.posY = 500.0
     p.width = 200.0
     p.height = 25.0
 //------------------------------------------------------- move trash cube -----------------------------------------------------------------------
